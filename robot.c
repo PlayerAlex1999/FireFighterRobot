@@ -51,7 +51,7 @@ vector getPath(s_room* room, s_pos dest) {
     currentNode = (s_node*)vector_get(&openedList, 0);
 
     for(int i=1; i < vector_total(&openedList); i++) {
-      if(currentNode->H < ((s_node*)vector_get(&openedList, i))->H) {
+      if(currentNode->H > ((s_node*)vector_get(&openedList, i))->H) {
         currentNode = (s_node*)vector_get(&openedList, i);
         currentIdx = i;
       }
@@ -124,22 +124,6 @@ int mustBeIgnored(vector* op, vector* cl, s_node* node) {
   return -1;
 }
 
-int getDistance(s_room* room, s_pos dest) {
-  if(room->nodes[dest.y][dest.x].symb == TILE_WALL)
-    return -1;
-
-  vector path = getPath(room, dest);
-
-  int distance = vector_total(&path);
-  if(distance == 0)
-    return -1;
-
-  printf("---------%d\n", distance);
-  vector_free(&path);
-
-  return distance;
-}
-
 int moveTo(s_room* room, vector* vect) {
   if(room->robot.pos.x == ((s_node*)vector_get(vect, 0))->pos.x && room->robot.pos.y == ((s_node*)vector_get(vect, 0))->pos.y)
     return 1;
@@ -182,19 +166,31 @@ int moveTo(s_room* room, vector* vect) {
       room->robot.healthPoints -= 3;
     }
 
-    for(int i=-2; i<=2; i++) {
-      for(int j=-2; j<=2; j++) {
-        if(nextPos.x + j < 1 || nextPos.x + j >= room->sizeX-1 || nextPos.y + i < 1 || nextPos.y + i >= room->sizeY-1)
-          continue;
-
-        s_pos dest = (s_pos){nextPos.y + i, nextPos.x + j};
-        int distance = getDistance(room, dest);
-        if(distance >= 0 && distance <= 2)
-          room->nodes[nextPos.y + i][nextPos.x + j].robotVision = TILE_NOFIRE;
-      }
-    }
+    addToRobotVision(room, (s_pos){nextPos.x, nextPos.y});
+    for(int i=-1; i<=1; i++)
+      for(int j=-1; j<=1; j++)
+        if(fabs(i) != fabs(j))
+          addToRobotVision(room, (s_pos){nextPos.x + i, nextPos.y + j});
   }
   room->robot.moving++;
 
   return 0;
+}
+
+void addToRobotVision(s_room* room, s_pos pos) {
+  if(room->nodes[pos.y][pos.x].symb == TILE_WALL)
+    return;
+
+  for(int i=-1; i<= 1; i++) {
+    for(int j=-1; j<= 1; j++) {
+      if(fabs(i) == fabs(j))
+        continue;
+
+      if(pos.x + i < 0 || pos.x + i >= room->sizeX || pos.y + j < 0 || pos.y + j >= room->sizeY)
+        continue;
+
+      if(room->nodes[pos.y + j][pos.x + i].symb != TILE_WALL && room->nodes[pos.y + j][pos.x + i].robotVision != TILE_VISITED)
+        room->nodes[pos.y + j][pos.x + i].robotVision = TILE_NOFIRE;
+    }
+  }
 }
