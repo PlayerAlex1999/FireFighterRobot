@@ -12,9 +12,11 @@
 #define TILE_FIRE_LVL2 '2'
 #define TILE_FIRE_LVL3 '3'
 
+#define TILE_VISITED '#'
+#define TILE_NOFIRE '-'
 
 s_room loadRoom(char* mapFilename);
-void displayRoom(s_room* room);
+void displayRoom(s_room* room, int drawRobotVision);
 int moveRobot(s_room* room, e_direction dir);
 
 #endif

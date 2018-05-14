@@ -22,6 +22,7 @@ typedef struct s_pos {
 typedef struct s_node s_node;
 struct s_node {
   char symb;
+  char robotVision;
   s_pos pos;
 
   int G;
@@ -34,7 +35,7 @@ typedef struct s_robot {
   int healthPoints;
 
   int hasExtinguisher;
-  s_pos firePosition;
+  int moving;
 
   s_node* path;
 } s_robot;

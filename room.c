@@ -53,6 +53,10 @@ s_room loadRoom(char* mapFilename) {
       }
 
       room.nodes[i][j].symb = c;
+      if(c != TILE_FIRE_LVL1 && c != TILE_FIRE_LVL2 && c !=TILE_FIRE_LVL3)
+        room.nodes[i][j].robotVision = c;
+      else
+        room.nodes[i][j].robotVision = ' ';
       room.nodes[i][j].G = 0;
       room.nodes[i][j].H =0;
       room.nodes[i][j].parent = NULL;
@@ -89,20 +93,29 @@ s_room loadRoom(char* mapFilename) {
   return room;
 }
 
-void displayRoom(s_room* room) {
+void displayRoom(s_room* room, int drawRobotVision) {
   for(int i=0; i<10; i++)
     printf("\n");
 
   for(int i=0; i<room->sizeY; i++) {
-    for(int j=0; j<room->sizeX; j++)
+    for(int j=0; j<room->sizeX; j++) {
       if(isAtPos(&(room->robot), j, i))
         printf("%c", displayRobot(&(room->robot)));
       else
         printf("%c", room->nodes[i][j].symb);
-        //printf("%.0f ", room->nodes[i][j].H);
+    }
+
+    printf("           ");
+    for(int j=0; j<room->sizeX && drawRobotVision; j++) {
+      if(isAtPos(&(room->robot), j, i))
+        printf("%c", displayRobot(&(room->robot)));
+      else
+        printf("%c", room->nodes[i][j].robotVision);
+    }
 
     printf("\n");
   }
+  printf("Coords: (%2d;%2d)    Has extinguisher: %d      HP: %d\n", room->robot.pos.x, room->robot.pos.y, room->robot.hasExtinguisher, room->robot.healthPoints);
 }
 
 int moveRobot(s_room* room, e_direction dir) {

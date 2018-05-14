@@ -5,10 +5,10 @@ int main() {
   int stop=0;
   s_room room = loadRoom(DEFAULT_ROOM);
   vector path = getPath(&room, room.extinguisherPos);
-  displayRoom(&room);
+  displayRoom(&room, 0);
 
   while(!stop) {
-      displayRoom(&room);
+      displayRoom(&room, 1);
       stop = moveTo(&room, &path);
       usleep(100000);
   }

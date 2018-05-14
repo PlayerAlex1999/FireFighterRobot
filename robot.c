@@ -4,7 +4,7 @@
 s_robot initRobot(int x, int y) {
   s_robot robot;
   robot.pos = (s_pos){x, y};
-  robot.firePosition = (s_pos){-1, -1};
+  robot.moving = 0;
   robot.hasExtinguisher = 0;
 
   robot.healthPoints = DEFAULT_HP;
@@ -95,10 +95,16 @@ vector getPath(s_room* room, s_pos dest) {
 
   vector path;
   vector_init(&path);
+  if(pathFound == 2)
+    return path;
+
   while(last->parent != NULL) {
     vector_add(&path, last);
     last = last->parent;
   }
+
+  vector_free(&openedList);
+  vector_free(&closedList);
 
   return path;
 }
@@ -108,7 +114,7 @@ int mustBeIgnored(vector* op, vector* cl, s_node* node) {
     if(vector_get(cl, i) == node)
       return -2;
 
-  if(node->symb == TILE_WALL || node->symb == TILE_FIRE_LVL2 || node->symb == TILE_FIRE_LVL3)
+  if(node->symb == TILE_WALL)
     return -2;
 
   for(int i=0; i<vector_total(op); i++)
@@ -118,12 +124,28 @@ int mustBeIgnored(vector* op, vector* cl, s_node* node) {
   return -1;
 }
 
+int getDistance(s_room* room, s_pos dest) {
+  if(room->nodes[dest.y][dest.x].symb == TILE_WALL)
+    return -1;
+
+  vector path = getPath(room, dest);
+
+  int distance = vector_total(&path);
+  if(distance == 0)
+    return -1;
+
+  printf("---------%d\n", distance);
+  vector_free(&path);
+
+  return distance;
+}
+
 int moveTo(s_room* room, vector* vect) {
   if(room->robot.pos.x == ((s_node*)vector_get(vect, 0))->pos.x && room->robot.pos.y == ((s_node*)vector_get(vect, 0))->pos.y)
     return 1;
 
   s_pos currentPos = room->robot.pos;
-  s_pos nextPos;
+  s_pos nextPos = (s_pos){-1, -1};
   for(int i=1; i<vector_total(vect); i++) {
     if(room->robot.pos.x == ((s_node*)vector_get(vect, i))->pos.x && room->robot.pos.y == ((s_node*)vector_get(vect, i))->pos.y) {
       nextPos = ((s_node*)vector_get(vect, i-1))->pos;
@@ -139,6 +161,40 @@ int moveTo(s_room* room, vector* vect) {
     moveRobot(room, DOWN);
   else if(currentPos.x > nextPos.x)
     moveRobot(room, LEFT);
+
+
+  if(nextPos.x != -1 && nextPos.y != -1) {
+    if(room->nodes[nextPos.y][nextPos.x].symb == TILE_EXTINGUISHER) {
+      room->nodes[nextPos.y][nextPos.x].symb = ' ';
+      room->robot.hasExtinguisher = 1;
+    }
+
+    if(room->nodes[nextPos.y][nextPos.x].symb == ' ')
+      room->nodes[nextPos.y][nextPos.x].robotVision = TILE_VISITED;
+    else if(room->nodes[nextPos.y][nextPos.x].symb == TILE_FIRE_LVL1) {
+      room->nodes[nextPos.y][nextPos.x].robotVision = TILE_FIRE_LVL1;
+      room->robot.healthPoints -= 1;
+    } else if(room->nodes[nextPos.y][nextPos.x].symb == TILE_FIRE_LVL2) {
+      room->nodes[nextPos.y][nextPos.x].robotVision = TILE_FIRE_LVL2;
+      room->robot.healthPoints -= 2;
+    } else if(room->nodes[nextPos.y][nextPos.x].symb == TILE_FIRE_LVL3) {
+      room->nodes[nextPos.y][nextPos.x].robotVision = TILE_FIRE_LVL3;
+      room->robot.healthPoints -= 3;
+    }
+
+    for(int i=-2; i<=2; i++) {
+      for(int j=-2; j<=2; j++) {
+        if(nextPos.x + j < 1 || nextPos.x + j >= room->sizeX-1 || nextPos.y + i < 1 || nextPos.y + i >= room->sizeY-1)
+          continue;
+
+        s_pos dest = (s_pos){nextPos.y + i, nextPos.x + j};
+        int distance = getDistance(room, dest);
+        if(distance >= 0 && distance <= 2)
+          room->nodes[nextPos.y + i][nextPos.x + j].robotVision = TILE_NOFIRE;
+      }
+    }
+  }
+  room->robot.moving++;
 
   return 0;
 }
