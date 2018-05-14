@@ -14,9 +14,9 @@ s_room loadRoom(char* mapFilename) {
   fscanf(file, "%d:%d\n", &(room.sizeX), &(room.sizeY));
   printf("Room size : %dx%d\n", room.sizeX, room.sizeY);
 
-  room.tiles = malloc(room.sizeY*sizeof(char*));
+  room.nodes = malloc(room.sizeY*sizeof(s_node*));
   for(int i=0; i<room.sizeY; i++)
-    room.tiles[i] = malloc(room.sizeX*sizeof(char));
+    room.nodes[i] = malloc(room.sizeX*sizeof(s_node));
 
   int startPosFound=0, extinguisherPosFound=0, fireCenterFound=0;
 
@@ -52,7 +52,11 @@ s_room loadRoom(char* mapFilename) {
         fireCenterFound++;
       }
 
-      room.tiles[i][j] = c;
+      room.nodes[i][j].symb = c;
+      room.nodes[i][j].G = 0;
+      room.nodes[i][j].H =0;
+      room.nodes[i][j].parent = NULL;
+      room.nodes[i][j].pos = (s_pos){i,j};
     }
   }
 
@@ -94,7 +98,8 @@ void displayRoom(s_room* room) {
       if(isAtPos(&(room->robot), j, i))
         printf("%c", displayRobot(&(room->robot)));
       else
-        printf("%c", room->tiles[i][j]);
+        printf("%c", room->nodes[i][j].symb);
+        //printf("%.0f ", room->nodes[i][j].H);
 
     printf("\n");
   }
@@ -125,7 +130,7 @@ int moveRobot(s_room* room, e_direction dir) {
   }
 
   if(newX >= 0 && newX < room->sizeX && newY>=0 && newY < room->sizeY) {
-    if(room->tiles[newY][newX] != TILE_WALL) {
+    if(room->nodes[newY][newX].symb != TILE_WALL) {
       room->robot.pos.x = newX;
       room->robot.pos.y = newY;
       return 1;
