@@ -18,6 +18,8 @@ s_room loadRoom(char* mapFilename) {
   for(int i=0; i<room.sizeY; i++)
     room.tiles[i] = malloc(room.sizeX*sizeof(char));
 
+  int startPosFound=0, extinguisherPosFound=0, fireCenterFound=0;
+
   char c;
   for(int i=0; i<room.sizeY; i++) {
     for(int j=0; j<room.sizeX+1; j++) {
@@ -25,18 +27,68 @@ s_room loadRoom(char* mapFilename) {
       if(c == '\n')
         continue;
 
+      if(c == TILE_START) {
+        if(!startPosFound)
+          room.startPos = (s_pos){j, i};
+        else
+          c = ' ';
+
+        startPosFound++;
+      }
+
+      if(c == TILE_EXTINGUISHER) {
+        if(!extinguisherPosFound)
+          room.extinguisherPos = (s_pos){j, i};
+        else
+          c = ' ';
+
+        extinguisherPosFound++;
+      }
+
+      if(c == TILE_FIRE_LVL3) {
+        if(fireCenterFound)
+          c = ' ';
+
+        fireCenterFound++;
+      }
+
       room.tiles[i][j] = c;
     }
   }
 
-  displayRoom(room);
+  if(startPosFound == 0) {
+    printf("[CRITICAL] No starting position found.\n");
+    exit(EXIT_FAILURE);
+  } else if (startPosFound > 1) {
+    printf("[WARNING] More than one starting position found. Copies have been deleted.\n");
+  }
+
+  if(extinguisherPosFound == 0) {
+    printf("[CRITICAL] No extinguisher found\n");
+    exit(EXIT_FAILURE);
+  } else if (extinguisherPosFound > 1) {
+    printf("[WARNING] More than one extinguisher found. Copies have been deleted\n");
+  }
+
+  if(fireCenterFound== 0) {
+    printf("[CRITICAL] No fire center found\n");
+    exit(EXIT_FAILURE);
+  } else if (fireCenterFound > 1) {
+    printf("[WARNING] More than one fire center found. Copies have been deleted\n");
+  }
+
+  printf("Starting position : (%d;%d)\n", room.startPos.x, room.startPos.y);
+  printf("Extinguiser : (%d;%d)\n", room.extinguisherPos.x, room.extinguisherPos.y);
+  printf("\n");
+
+  displayRoom(&room);
   return room;
 }
 
-void displayRoom(s_room room) {
-  for(int i=0; i<room.sizeY; i++) {
-    for(int j=0; j<room.sizeX; j++)
-      printf("%c", room.tiles[i][j]);
+void displayRoom(s_room* room) {
+  for(int i=0; i<room->sizeY; i++) {
+    for(int j=0; j<room->sizeX; j++)
+      printf("%c", room->tiles[i][j]);
 
     printf("\n");
   }

@@ -12,7 +12,8 @@ typedef struct s_room {
   int sizeX, sizeY;
   char** tiles;
 
-  s_pos extinguisher;
+  s_pos startPos;
+  s_pos extinguisherPos;
 } s_room;
 
 #endif
