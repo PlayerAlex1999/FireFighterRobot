@@ -13,6 +13,6 @@ typedef struct s_room {
   char** tiles;
 
   s_pos extinguisher;
-}
+} s_room;
 
 #endif

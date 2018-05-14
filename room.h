@@ -3,4 +3,9 @@
 
 #include "includes.h"
 
+#define DEFAULT_ROOM "./plans/plan1.txt"
+
+s_room loadRoom(char* mapFilename);
+void displayRoom(s_room room);
+
 #endif
