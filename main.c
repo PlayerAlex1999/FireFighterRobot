@@ -7,6 +7,7 @@ int main() {
 
   while(!stop) {
       displayRoom(&room);
+      stop = !moveRobot(&room, UP);
       usleep(500000);
   }
 

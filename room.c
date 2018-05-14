@@ -99,3 +99,39 @@ void displayRoom(s_room* room) {
     printf("\n");
   }
 }
+
+int moveRobot(s_room* room, e_direction dir) {
+  int newX=room->robot.pos.x, newY=room->robot.pos.y;
+
+  switch (dir) {
+    case UP:
+      newY--;
+      break;
+
+    case RIGHT:
+      newX++;
+      break;
+
+    case DOWN:
+      newY++;
+      break;
+
+    case LEFT:
+      newX--;
+      break;
+
+    default:
+      printf("[WARNING] Unknown direction\n");
+  }
+
+  if(newX >= 0 && newX < room->sizeX && newY>=0 && newY < room->sizeY) {
+    if(room->tiles[newY][newX] != TILE_WALL) {
+      room->robot.pos.x = newX;
+      room->robot.pos.y = newY;
+      return 1;
+    }
+  }
+
+  printf("[WARNING] Can't go outside the map\n");
+  return 0;
+}

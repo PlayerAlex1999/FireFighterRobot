@@ -11,34 +11,11 @@ s_robot initRobot(int x, int y) {
   return robot;
 }
 
-void goToAdjacentTile(s_robot* robot, e_direction dir) {
-  switch (dir) {
-    case UP:
-      robot->pos.y--;
-      break;
-
-    case RIGHT:
-      robot->pos.x++;
-      break;
-
-    case DOWN:
-      robot->pos.y++;
-      break;
-
-    case LEFT:
-      robot->pos.x--;
-      break;
-
-    default:
-      printf("[WARNING] Uknown direction : %d\n", dir);
-  }
-}
-
 char displayRobot(s_robot* robot) {
   if(robot->hasExtinguisher == 1)
-    return TILE_ROBOT;
+    return TILE_ROBOT_WITH_EXTINGUISHER;
 
-  return TILE_ROBOT_WITH_EXTINGUISHER;
+  return ROBOT;
 }
 
 int isAtPos(s_robot* robot, int x, int y) {

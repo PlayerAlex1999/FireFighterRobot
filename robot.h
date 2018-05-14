@@ -11,6 +11,5 @@
 s_robot initRobot(int x, int y);
 char displayRobot(s_robot* robot);
 int isAtPos(s_robot* robot, int x, int y);
-void goToAdjacentTile(s_robot* robot, e_direction dir);
 
 #endif
