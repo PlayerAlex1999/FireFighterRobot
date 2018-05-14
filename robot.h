@@ -13,7 +13,8 @@ s_robot initRobot(int x, int y);
 char displayRobot(s_robot* robot);
 int isAtPos(s_robot* robot, int x, int y);
 
-s_node* getPath(s_room* room, s_pos dest);
+vector getPath(s_room* room, s_pos dest);
 int mustBeIgnored(vector* op, vector* cl, s_node* node);
+int moveTo(s_room* room, vector* vect);
 
 #endif

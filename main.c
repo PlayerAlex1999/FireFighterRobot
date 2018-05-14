@@ -4,14 +4,13 @@
 int main() {
   int stop=0;
   s_room room = loadRoom(DEFAULT_ROOM);
-  getPath(&room, room.extinguisherPos);
-  //printf("%d\n", room.nodes[10][0].pos.x);
+  vector path = getPath(&room, room.extinguisherPos);
   displayRoom(&room);
 
-  while(!stop && 0) {
+  while(!stop) {
       displayRoom(&room);
-      stop = !moveRobot(&room, UP);
-      usleep(500000);
+      stop = moveTo(&room, &path);
+      usleep(100000);
   }
 
   return EXIT_SUCCESS;

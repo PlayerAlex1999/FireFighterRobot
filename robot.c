@@ -27,7 +27,7 @@ int isAtPos(s_robot* robot, int x, int y) {
   return 0;
 }
 
-s_node* getPath(s_room* room, s_pos dest) {
+vector getPath(s_room* room, s_pos dest) {
   int pathFound = 0;
   s_node* last = 0;
   s_node* currentNode = &(room->nodes[room->robot.pos.y][room->robot.pos.x]);
@@ -70,6 +70,9 @@ s_node* getPath(s_room* room, s_pos dest) {
         if(currentNode->pos.y + i < 0 || currentNode->pos.y + i >= room->sizeY || currentNode->pos.x + j < 0 || currentNode->pos.x +j >= room->sizeX)
           continue;
 
+        if(fabs(i) == fabs(j))
+          continue;
+
         int status = mustBeIgnored(&openedList, &closedList, &(room->nodes[currentNode->pos.y + i][currentNode->pos.x + j]));
         if(status == -1) {
           room->nodes[currentNode->pos.y + i][currentNode->pos.x + j].parent = currentNode;
@@ -90,12 +93,14 @@ s_node* getPath(s_room* room, s_pos dest) {
       pathFound = 2;
   }
 
+  vector path;
+  vector_init(&path);
   while(last->parent != NULL) {
-    last->symb = 'O';
+    vector_add(&path, last);
     last = last->parent;
   }
 
-  return NULL;
+  return path;
 }
 
 int mustBeIgnored(vector* op, vector* cl, s_node* node) {
@@ -111,4 +116,29 @@ int mustBeIgnored(vector* op, vector* cl, s_node* node) {
       return i;
 
   return -1;
+}
+
+int moveTo(s_room* room, vector* vect) {
+  if(room->robot.pos.x == ((s_node*)vector_get(vect, 0))->pos.x && room->robot.pos.y == ((s_node*)vector_get(vect, 0))->pos.y)
+    return 1;
+
+  s_pos currentPos = room->robot.pos;
+  s_pos nextPos;
+  for(int i=1; i<vector_total(vect); i++) {
+    if(room->robot.pos.x == ((s_node*)vector_get(vect, i))->pos.x && room->robot.pos.y == ((s_node*)vector_get(vect, i))->pos.y) {
+      nextPos = ((s_node*)vector_get(vect, i-1))->pos;
+      break;
+    }
+  }
+
+  if(currentPos.y > nextPos.y)
+    moveRobot(room, UP);
+  else if(currentPos.x < nextPos.x)
+    moveRobot(room, RIGHT);
+  else if(currentPos.y > nextPos.y)
+    moveRobot(room, DOWN);
+  else if(currentPos.x > nextPos.x)
+    moveRobot(room, LEFT);
+
+  return 0;
 }
