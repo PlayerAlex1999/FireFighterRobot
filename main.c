@@ -5,6 +5,7 @@ int main() {
   int stop=0;
   s_room room = loadRoom(DEFAULT_ROOM);
   getPath(&room, room.extinguisherPos);
+  //printf("%d\n", room.nodes[10][0].pos.x);
   displayRoom(&room);
 
   while(!stop && 0) {

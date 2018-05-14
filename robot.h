@@ -14,6 +14,6 @@ char displayRobot(s_robot* robot);
 int isAtPos(s_robot* robot, int x, int y);
 
 s_node* getPath(s_room* room, s_pos dest);
-int mustBeIgnored(vector* vect, s_node* node);
+int mustBeIgnored(vector* op, vector* cl, s_node* node);
 
 #endif

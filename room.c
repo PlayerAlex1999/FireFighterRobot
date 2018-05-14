@@ -56,7 +56,7 @@ s_room loadRoom(char* mapFilename) {
       room.nodes[i][j].G = 0;
       room.nodes[i][j].H =0;
       room.nodes[i][j].parent = NULL;
-      room.nodes[i][j].pos = (s_pos){i,j};
+      room.nodes[i][j].pos = (s_pos){j,i};
     }
   }
 
