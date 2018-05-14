@@ -2,7 +2,13 @@
 #include "room.h"
 
 int main() {
-  loadRoom(DEFAULT_ROOM);
-  
+  int stop=0;
+  s_room room = loadRoom(DEFAULT_ROOM);
+
+  while(!stop) {
+      displayRoom(&room);
+      usleep(500000);
+  }
+
   return EXIT_SUCCESS;
 }

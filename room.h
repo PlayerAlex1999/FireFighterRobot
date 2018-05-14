@@ -2,6 +2,7 @@
 #define ROOM_H
 
 #include "includes.h"
+#include "robot.h"
 
 #define DEFAULT_ROOM "./plans/plan1.txt"
 #define TILE_WALL 'X'

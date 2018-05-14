@@ -78,17 +78,23 @@ s_room loadRoom(char* mapFilename) {
   }
 
   printf("Starting position : (%d;%d)\n", room.startPos.x, room.startPos.y);
-  printf("Extinguiser : (%d;%d)\n", room.extinguisherPos.x, room.extinguisherPos.y);
+  printf("Extinguisher : (%d;%d)\n", room.extinguisherPos.x, room.extinguisherPos.y);
   printf("\n");
 
-  displayRoom(&room);
+  room.robot = initRobot(room.startPos.x, room.startPos.y);
   return room;
 }
 
 void displayRoom(s_room* room) {
+  for(int i=0; i<10; i++)
+    printf("\n");
+
   for(int i=0; i<room->sizeY; i++) {
     for(int j=0; j<room->sizeX; j++)
-      printf("%c", room->tiles[i][j]);
+      if(isAtPos(&(room->robot), j, i))
+        printf("%c", displayRobot(&(room->robot)));
+      else
+        printf("%c", room->tiles[i][j]);
 
     printf("\n");
   }
