@@ -15,7 +15,7 @@ char displayRobot(s_robot* robot) {
   if(robot->hasExtinguisher == 1)
     return TILE_ROBOT_WITH_EXTINGUISHER;
 
-  return ROBOT;
+  return TILE_ROBOT;
 }
 
 int isAtPos(s_robot* robot, int x, int y) {
