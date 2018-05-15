@@ -32,6 +32,10 @@ vector getPath(s_room* room, s_pos dest) {
   s_node* last = 0;
   s_node* currentNode = &(room->nodes[room->robot.pos.y][room->robot.pos.x]);
 
+  for(int i=0; i<room->sizeX; i++)
+    for(int j=0; j<room->sizeY; j++)
+      room->nodes[j][i].parent = NULL;
+
   for(int i=0; i<room->sizeX; i++) {
     for(int j=0; j<room->sizeY; j++) {
       s_node* node = &(room->nodes[j][i]);
@@ -124,28 +128,18 @@ int mustBeIgnored(vector* op, vector* cl, s_node* node) {
   return -1;
 }
 
-int moveTo(s_room* room, vector* vect) {
-  if(room->robot.pos.x == ((s_node*)vector_get(vect, 0))->pos.x && room->robot.pos.y == ((s_node*)vector_get(vect, 0))->pos.y)
-    return 1;
-
+int moveTo(s_room* room, vector* vect, int idx) {
   s_pos currentPos = room->robot.pos;
-  s_pos nextPos = (s_pos){-1, -1};
-  for(int i=1; i<vector_total(vect); i++) {
-    if(room->robot.pos.x == ((s_node*)vector_get(vect, i))->pos.x && room->robot.pos.y == ((s_node*)vector_get(vect, i))->pos.y) {
-      nextPos = ((s_node*)vector_get(vect, i-1))->pos;
-      break;
-    }
-  }
+  s_pos nextPos = ((s_node*)vector_get(vect, idx))->pos;
 
   if(currentPos.y > nextPos.y)
     moveRobot(room, UP);
   else if(currentPos.x < nextPos.x)
     moveRobot(room, RIGHT);
-  else if(currentPos.y > nextPos.y)
+  else if(currentPos.y < nextPos.y)
     moveRobot(room, DOWN);
   else if(currentPos.x > nextPos.x)
     moveRobot(room, LEFT);
-
 
   if(nextPos.x != -1 && nextPos.y != -1) {
     if(room->nodes[nextPos.y][nextPos.x].symb == TILE_EXTINGUISHER) {
@@ -166,16 +160,19 @@ int moveTo(s_room* room, vector* vect) {
       room->robot.healthPoints -= 3;
     }
 
-    addToRobotVision(room, (s_pos){nextPos.x, nextPos.y});
-    for(int i=-1; i<=1; i++)
-      for(int j=-1; j<=1; j++)
-        if(fabs(i) != fabs(j))
-          addToRobotVision(room, (s_pos){nextPos.x + i, nextPos.y + j});
+    if(room->nodes[nextPos.y][nextPos.x].symb == ' ') {
+      addToRobotVision(room, (s_pos){nextPos.x, nextPos.y});
+      for(int i=-1; i<=1; i++)
+        for(int j=-1; j<=1; j++)
+          if(fabs(i) != fabs(j))
+            addToRobotVision(room, (s_pos){nextPos.x + i, nextPos.y + j});
+    }
   }
   room->robot.moving++;
 
-  return 0;
+  return idx-1;
 }
+
 
 void addToRobotVision(s_room* room, s_pos pos) {
   if(room->nodes[pos.y][pos.x].symb == TILE_WALL)
@@ -193,4 +190,39 @@ void addToRobotVision(s_room* room, s_pos pos) {
         room->nodes[pos.y + j][pos.x + i].robotVision = TILE_NOFIRE;
     }
   }
+}
+
+int getDistance(s_room* room, s_pos pos) {
+  vector path = getPath(room, pos);
+
+  int distance = vector_total(&path);
+  vector_free(&path);
+
+  return distance;
+}
+
+void setEmptyTilesInteresting(s_room* room) {
+  for(int i=0; i<room->sizeX; i++)
+    for(int j=0; j<room->sizeY; j++)
+      if(room->nodes[j][i].robotVision == TILE_EMPTY)
+        room->nodes[j][i].robotVision = TILE_INTERESTING;
+
+  for(int i=2; i<room->sizeX-2; i++)
+    for(int j=2; j<room->sizeY-2; j++) {
+      int pointFound = 1;
+
+      for(int k=-1; k<=1; k++)
+        for(int l=-1; l<=1; l++) {
+          if(room->nodes[j+k][i+l].robotVision != TILE_INTERESTING)
+            pointFound =0;
+        }
+
+      if(pointFound) {
+        for(int k=-1; k<=1; k++)
+          for(int l=-1; l<=1; l++)
+            room->nodes[j+k][i+l].robotVision = TILE_EMPTY;
+
+        room->nodes[j][i].robotVision = TILE_INTERESTING;
+      }
+    }
 }

@@ -116,6 +116,7 @@ void displayRoom(s_room* room, int drawRobotVision) {
     printf("\n");
   }
   printf("Coords: (%2d;%2d)    Has extinguisher: %d      HP: %d\n", room->robot.pos.x, room->robot.pos.y, room->robot.hasExtinguisher, room->robot.healthPoints);
+  printf("Moves : %d\n", room->robot.moving);
 }
 
 int moveRobot(s_room* room, e_direction dir) {
@@ -141,6 +142,7 @@ int moveRobot(s_room* room, e_direction dir) {
     default:
       printf("[WARNING] Unknown direction\n");
   }
+
 
   if(newX >= 0 && newX < room->sizeX && newY>=0 && newY < room->sizeY) {
     if(room->nodes[newY][newX].symb != TILE_WALL) {

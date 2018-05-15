@@ -16,6 +16,8 @@ int isAtPos(s_robot* robot, int x, int y);
 vector getPath(s_room* room, s_pos dest);
 int mustBeIgnored(vector* op, vector* cl, s_node* node);
 void addToRobotVision(s_room* room, s_pos pos);
-int moveTo(s_room* room, vector* vect);
+int moveTo(s_room* room, vector* vect, int idx);
+int getDistance(s_room* room, s_pos pos);
+void setEmptyTilesInteresting(s_room* room);
 
 #endif
