@@ -15,6 +15,7 @@
 
 #define TILE_VISITED '#'
 #define TILE_NOFIRE '-'
+#define TILE_POTENTIAL_FIRE '.'
 #define TILE_INTERESTING '*'
 
 s_room loadRoom(char* mapFilename);

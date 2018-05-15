@@ -90,6 +90,12 @@ s_room loadRoom(char* mapFilename) {
   printf("\n");
 
   room.robot = initRobot(room.startPos.x, room.startPos.y);
+  addToRobotVision(&room, (s_pos){room.startPos.x, room.startPos.y});
+  for(int i=-1; i<=1; i++)
+    for(int j=-1; j<=1; j++)
+      if(fabs(i) != fabs(j))
+        addToRobotVision(&room, (s_pos){room.startPos.x + i, room.startPos.y + j});
+
   return room;
 }
 

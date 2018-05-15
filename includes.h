@@ -36,6 +36,7 @@ typedef struct s_robot {
 
   int hasExtinguisher;
   int moving;
+  int fireDetected;
 
   s_node* path;
 } s_robot;

@@ -6,6 +6,7 @@ s_robot initRobot(int x, int y) {
   robot.pos = (s_pos){x, y};
   robot.moving = 0;
   robot.hasExtinguisher = 0;
+  robot.fireDetected = 0;
 
   robot.healthPoints = DEFAULT_HP;
 
@@ -27,10 +28,10 @@ int isAtPos(s_robot* robot, int x, int y) {
   return 0;
 }
 
-vector getPath(s_room* room, s_pos dest) {
+vector getPath(s_room* room, s_pos origin, s_pos dest) {
   int pathFound = 0;
   s_node* last = 0;
-  s_node* currentNode = &(room->nodes[room->robot.pos.y][room->robot.pos.x]);
+  s_node* currentNode = &(room->nodes[origin.y][origin.x]);
 
   for(int i=0; i<room->sizeX; i++)
     for(int j=0; j<room->sizeY; j++)
@@ -102,7 +103,7 @@ vector getPath(s_room* room, s_pos dest) {
   if(pathFound == 2)
     return path;
 
-  while(last->parent != NULL) {
+  while(last != NULL) {
     vector_add(&path, last);
     last = last->parent;
   }
@@ -111,6 +112,26 @@ vector getPath(s_room* room, s_pos dest) {
   vector_free(&closedList);
 
   return path;
+}
+
+vector getBestPath(s_room* room, s_pos origin, s_pos dest) {
+  vector originToDest = getPath(room, origin, dest);
+  vector destToOrigin = getPath(room, dest, origin);
+
+  if(vector_total(&originToDest) <= vector_total(&destToOrigin)) {
+    vector_free(&destToOrigin);
+    return originToDest;
+  }
+
+  vector temp;
+  vector_init(&temp);
+  for(int i=vector_total(&destToOrigin)-1; i>=0; i--)
+    vector_add(&temp, vector_get(&destToOrigin, i));
+
+  vector_free(&originToDest);
+  vector_free(&destToOrigin);
+
+  return temp;
 }
 
 int mustBeIgnored(vector* op, vector* cl, s_node* node) {
@@ -147,20 +168,23 @@ int moveTo(s_room* room, vector* vect, int idx) {
       room->robot.hasExtinguisher = 1;
     }
 
-    if(room->nodes[nextPos.y][nextPos.x].symb == ' ')
+    if(room->nodes[nextPos.y][nextPos.x].symb == TILE_EMPTY)
       room->nodes[nextPos.y][nextPos.x].robotVision = TILE_VISITED;
     else if(room->nodes[nextPos.y][nextPos.x].symb == TILE_FIRE_LVL1) {
       room->nodes[nextPos.y][nextPos.x].robotVision = TILE_FIRE_LVL1;
       room->robot.healthPoints -= 1;
+      room->robot.fireDetected++;
     } else if(room->nodes[nextPos.y][nextPos.x].symb == TILE_FIRE_LVL2) {
       room->nodes[nextPos.y][nextPos.x].robotVision = TILE_FIRE_LVL2;
       room->robot.healthPoints -= 2;
+      room->robot.fireDetected++;
     } else if(room->nodes[nextPos.y][nextPos.x].symb == TILE_FIRE_LVL3) {
       room->nodes[nextPos.y][nextPos.x].robotVision = TILE_FIRE_LVL3;
       room->robot.healthPoints -= 3;
+      room->robot.fireDetected++;
     }
 
-    if(room->nodes[nextPos.y][nextPos.x].symb == ' ') {
+    if(room->nodes[nextPos.y][nextPos.x].symb == TILE_EMPTY) {
       addToRobotVision(room, (s_pos){nextPos.x, nextPos.y});
       for(int i=-1; i<=1; i++)
         for(int j=-1; j<=1; j++)
@@ -186,43 +210,18 @@ void addToRobotVision(s_room* room, s_pos pos) {
       if(pos.x + i < 0 || pos.x + i >= room->sizeX || pos.y + j < 0 || pos.y + j >= room->sizeY)
         continue;
 
-      if(room->nodes[pos.y + j][pos.x + i].symb != TILE_WALL && room->nodes[pos.y + j][pos.x + i].robotVision != TILE_VISITED)
+      if(room->nodes[pos.y + j][pos.x + i].robotVision == TILE_EMPTY)
         room->nodes[pos.y + j][pos.x + i].robotVision = TILE_NOFIRE;
     }
   }
 }
 
+//pos={x,y}
 int getDistance(s_room* room, s_pos pos) {
-  vector path = getPath(room, pos);
+  vector path = getPath(room, room->robot.pos, pos);
 
   int distance = vector_total(&path);
   vector_free(&path);
 
-  return distance;
-}
-
-void setEmptyTilesInteresting(s_room* room) {
-  for(int i=0; i<room->sizeX; i++)
-    for(int j=0; j<room->sizeY; j++)
-      if(room->nodes[j][i].robotVision == TILE_EMPTY)
-        room->nodes[j][i].robotVision = TILE_INTERESTING;
-
-  for(int i=2; i<room->sizeX-2; i++)
-    for(int j=2; j<room->sizeY-2; j++) {
-      int pointFound = 1;
-
-      for(int k=-1; k<=1; k++)
-        for(int l=-1; l<=1; l++) {
-          if(room->nodes[j+k][i+l].robotVision != TILE_INTERESTING)
-            pointFound =0;
-        }
-
-      if(pointFound) {
-        for(int k=-1; k<=1; k++)
-          for(int l=-1; l<=1; l++)
-            room->nodes[j+k][i+l].robotVision = TILE_EMPTY;
-
-        room->nodes[j][i].robotVision = TILE_INTERESTING;
-      }
-    }
+  return distance-1;
 }
