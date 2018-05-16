@@ -6,14 +6,18 @@ int main() {
 
   srand(time(NULL));
 
+  s_SDLData SDLData = initSDL();
+
   s_room room = loadRoom(DEFAULT_ROOM);
   vector path = getBestPath(&room, room.startPos, room.extinguisherPos);
   displayRoom(&room, 0);
+  displayScreen(&SDLData, &room);
 
   int idx = vector_total(&path)-2;
 
   while(!stop) {
       displayRoom(&room, 1);
+      displayScreen(&SDLData, &room);
 
       if(room.robot.status == STATUS_GO_TO_EXTINGUISHER) {
         if(idx >= 0)
@@ -42,6 +46,10 @@ int main() {
   }
   displayRoom(&room, 1);
 
+  //PAS OUBLIER DE FREE
+
   vector_free(&path);
+
+  SDL_Quit();
   return EXIT_SUCCESS;
 }

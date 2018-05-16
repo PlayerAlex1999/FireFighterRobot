@@ -3,6 +3,7 @@
 
 #include "includes.h"
 #include "robot.h"
+#include "display.h"
 
 #define DEFAULT_ROOM "./plans/plan1.txt"
 #define TILE_EMPTY ' '
@@ -17,6 +18,8 @@
 #define TILE_NOFIRE '-'
 #define TILE_POTENTIAL_FIRE '.'
 #define TILE_INTERESTING '*'
+#define TILE_EXTINGUISHED_FIRE '_'
+#define TILE_BLACK 'B'
 
 s_room loadRoom(char* mapFilename);
 void displayRoom(s_room* room, int drawRobotVision);

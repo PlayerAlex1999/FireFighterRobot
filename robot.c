@@ -153,6 +153,11 @@ int mustBeIgnored(vector* op, vector* cl, s_node* node) {
 }
 
 int moveTo(s_room* room, vector* vect, int idx) {
+  if(vector_get(vect, 0) == NULL) {
+    printf("[CRITICAL] No path found\n");
+    exit(EXIT_FAILURE);
+  }
+
   s_pos currentPos = room->robot.pos;
   s_pos nextPos = ((s_node*)vector_get(vect, idx))->pos;
 
