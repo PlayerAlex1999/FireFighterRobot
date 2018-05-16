@@ -8,6 +8,7 @@ s_robot initRobot(int x, int y) {
   robot.hasExtinguisher = 0;
   robot.fireDetected = 0;
 
+  robot.status = STATUS_GO_TO_EXTINGUISHER;
   robot.healthPoints = DEFAULT_HP;
 
   return robot;
@@ -162,10 +163,14 @@ int moveTo(s_room* room, vector* vect, int idx) {
   else if(currentPos.x > nextPos.x)
     moveRobot(room, LEFT);
 
+
+  //IF A SUPPRIMER
   if(nextPos.x != -1 && nextPos.y != -1) {
     if(room->nodes[nextPos.y][nextPos.x].symb == TILE_EXTINGUISHER) {
       room->nodes[nextPos.y][nextPos.x].symb = ' ';
       room->robot.hasExtinguisher = 1;
+      
+      setEmptyTilesInteresting(room);
     }
 
     if(room->nodes[nextPos.y][nextPos.x].symb == TILE_EMPTY)
@@ -194,11 +199,21 @@ int moveTo(s_room* room, vector* vect, int idx) {
   }
   room->robot.moving++;
 
+  if(idx == 0) {
+    if(room->robot.fireDetected == 0)
+      room->robot.status = STATUS_DETERMINE_INTERESTING_POINT;
+    else
+      room->robot.status = STATUS_GO_TO_FIRE;
+  }
+
   return idx-1;
 }
 
 
 void addToRobotVision(s_room* room, s_pos pos) {
+  if(pos.x < 0 || pos.y < 0 || pos.x >= room->sizeX || pos.y >= room->sizeY)
+    return;
+
   if(room->nodes[pos.y][pos.x].symb == TILE_WALL)
     return;
 
@@ -218,7 +233,7 @@ void addToRobotVision(s_room* room, s_pos pos) {
 
 //pos={x,y}
 int getDistance(s_room* room, s_pos pos) {
-  vector path = getPath(room, room->robot.pos, pos);
+  vector path = getBestPath(room, room->robot.pos, pos);
 
   int distance = vector_total(&path);
   vector_free(&path);
