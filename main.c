@@ -2,7 +2,10 @@
 #include "room.h"
 
 int main() {
-  int stop=0;
+  int stop = 0;
+
+  srand(time(NULL));
+
   s_room room = loadRoom(DEFAULT_ROOM);
   vector path = getBestPath(&room, room.startPos, room.extinguisherPos);
   displayRoom(&room, 0);
@@ -29,7 +32,8 @@ int main() {
         if(idx >= 0)
           idx = moveTo(&room, &path, idx);
         else
-          printf("[WARNING] Unpredicted behavior\n");
+          exit(1);
+          //printf("[WARNING] Unpredicted behavior\n");
       } else {
         stop = 1;
       }
@@ -37,8 +41,6 @@ int main() {
       usleep(50000);
   }
   displayRoom(&room, 1);
-
-  printf("%d\n", getDistance(&room, (s_pos){6, 7}));
 
   vector_free(&path);
   return EXIT_SUCCESS;

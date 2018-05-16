@@ -229,15 +229,23 @@ vector nextNodePath(s_room* room) {
     distances[i] = getDistance(room, node->pos);
   }
 
+  vector bestNodes;
+  vector_init(&bestNodes);
+  vector_add(&bestNodes, vector_get(&interestingPoints, 0));
+
   int minDist = distances[0];
-  int minIdx = 0;
   for(int i=1; i<vector_total(&interestingPoints); i++)
     if(distances[i] < minDist) {
+      vector_free(&bestNodes);
+      vector_init(&bestNodes);
+      vector_add(&bestNodes, vector_get(&interestingPoints, i));
+
       minDist = distances[i];
-      minIdx = i;
+    } else if(distances[i] == minDist) {
+      vector_add(&bestNodes, vector_get(&interestingPoints, i));
     }
 
-  s_node* node = (s_node*)vector_get(&interestingPoints, minIdx);
+  s_node* node = (s_node*)vector_get(&bestNodes, rand()%vector_total(&bestNodes));
 
   free(distances);
   vector_free(&interestingPoints);

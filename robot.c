@@ -101,8 +101,10 @@ vector getPath(s_room* room, s_pos origin, s_pos dest) {
 
   vector path;
   vector_init(&path);
-  if(pathFound == 2)
+  if(pathFound == 2) {
+    vector_set(&path, 0, NULL);
     return path;
+  }
 
   while(last != NULL) {
     vector_add(&path, last);
@@ -166,10 +168,17 @@ int moveTo(s_room* room, vector* vect, int idx) {
 
   //IF A SUPPRIMER
   if(nextPos.x != -1 && nextPos.y != -1) {
+    if(room->nodes[nextPos.y][nextPos.x].symb == TILE_EMPTY) {
+      addToRobotVision(room, (s_pos){nextPos.x, nextPos.y});
+      for(int i=-1; i<=1; i++)
+        for(int j=-1; j<=1; j++)
+          if(fabs(i) != fabs(j))
+            addToRobotVision(room, (s_pos){nextPos.x + i, nextPos.y + j});
+    }
+
     if(room->nodes[nextPos.y][nextPos.x].symb == TILE_EXTINGUISHER) {
       room->nodes[nextPos.y][nextPos.x].symb = ' ';
       room->robot.hasExtinguisher = 1;
-      
       setEmptyTilesInteresting(room);
     }
 
@@ -189,20 +198,13 @@ int moveTo(s_room* room, vector* vect, int idx) {
       room->robot.fireDetected++;
     }
 
-    if(room->nodes[nextPos.y][nextPos.x].symb == TILE_EMPTY) {
-      addToRobotVision(room, (s_pos){nextPos.x, nextPos.y});
-      for(int i=-1; i<=1; i++)
-        for(int j=-1; j<=1; j++)
-          if(fabs(i) != fabs(j))
-            addToRobotVision(room, (s_pos){nextPos.x + i, nextPos.y + j});
-    }
   }
   room->robot.moving++;
 
   if(idx == 0) {
-    if(room->robot.fireDetected == 0)
+    if(room->robot.fireDetected == 0) {
       room->robot.status = STATUS_DETERMINE_INTERESTING_POINT;
-    else
+    } else
       room->robot.status = STATUS_GO_TO_FIRE;
   }
 
@@ -234,6 +236,8 @@ void addToRobotVision(s_room* room, s_pos pos) {
 //pos={x,y}
 int getDistance(s_room* room, s_pos pos) {
   vector path = getBestPath(room, room->robot.pos, pos);
+  if(vector_get(&path, 0) == NULL)
+    return 100000;
 
   int distance = vector_total(&path);
   vector_free(&path);
