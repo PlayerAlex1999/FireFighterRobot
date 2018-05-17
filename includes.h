@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-//#include <unistd.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <SDL/SDL.h>
@@ -43,9 +43,9 @@ typedef struct s_robot {
   int moves;
   int fireDetected;
   int status;
+  s_pos lastFire;
 
   e_direction direction;
-  //s_node* path;
 } s_robot;
 
 typedef struct s_room {

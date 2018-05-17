@@ -11,6 +11,7 @@ s_robot initRobot(int x, int y) {
   robot.status = STATUS_GO_TO_EXTINGUISHER;
   robot.healthPoints = DEFAULT_HP;
   robot.direction = UP;
+  robot.lastFire = (s_pos) {-1,-1};
 
   return robot;
 }
@@ -23,9 +24,8 @@ char displayRobot(s_robot* robot) {
 }
 
 int isAtPos(s_robot* robot, int x, int y) {
-  if(robot->pos.x == x && robot->pos.y == y) {
+  if(robot->pos.x == x && robot->pos.y == y)
     return 1;
-  }
 
   return 0;
 }
@@ -188,39 +188,65 @@ int moveTo(s_room* room, vector* vect, int idx) {
       setEmptyTilesInteresting(room);
     }
 
+    room->robot.moves++;
+
+    if(room->robot.hasExtinguisher && room->nodes[nextPos.y][nextPos.x].symb == TILE_FIRE_LVL3) {
+      room->robot.status = STATUS_WAIT_TO_EXIT;
+      room->nodes[nextPos.y][nextPos.x].symb = TILE_EXTINGUISHED_FIRE;
+
+      return -1;
+    }
+
+    if(room->robot.hasExtinguisher
+      && (room->nodes[nextPos.y][nextPos.x].symb == TILE_FIRE_LVL1
+      || room->nodes[nextPos.y][nextPos.x].symb == TILE_FIRE_LVL2
+      || room->nodes[nextPos.y][nextPos.x].symb == TILE_FIRE_LVL3)) {
+
+      room->nodes[nextPos.y][nextPos.x].symb = TILE_EXTINGUISHED_FIRE;
+
+      if(room->robot.hasExtinguisher && nextPos.x == room->robot.lastFire.x && nextPos.y == room->robot.lastFire.y) {
+        if(room->robot.fireDetected == 3)
+          room->robot.status = STATUS_WAIT_TO_EXIT;
+        else
+          room->robot.status = STATUS_EXTINGUISH_FIRE;
+
+        return -1;
+      } else {
+        room->robot.status = STATUS_EXTINGUISH_FIRE;
+      }
+      return idx-1;
+    }
+
     if(room->nodes[nextPos.y][nextPos.x].symb == TILE_EMPTY)
       room->nodes[nextPos.y][nextPos.x].robotVision = TILE_VISITED;
     else if(room->nodes[nextPos.y][nextPos.x].symb == TILE_FIRE_LVL1) {
       room->nodes[nextPos.y][nextPos.x].robotVision = TILE_FIRE_LVL1;
       room->robot.healthPoints -= 1;
-      room->robot.fireDetected++;
+      if(room->robot.fireDetected <= 1) {
+        room->robot.fireDetected = 1;
+        room->robot.lastFire = (s_pos) {nextPos.x, nextPos.y};
+      }
     } else if(room->nodes[nextPos.y][nextPos.x].symb == TILE_FIRE_LVL2) {
       room->nodes[nextPos.y][nextPos.x].robotVision = TILE_FIRE_LVL2;
       room->robot.healthPoints -= 2;
-      room->robot.fireDetected++;
+      if(room->robot.fireDetected <= 2) {
+        room->robot.lastFire = (s_pos) {nextPos.x, nextPos.y};
+        room->robot.fireDetected = 2;
+      }
     } else if(room->nodes[nextPos.y][nextPos.x].symb == TILE_FIRE_LVL3) {
       room->nodes[nextPos.y][nextPos.x].robotVision = TILE_FIRE_LVL3;
       room->robot.healthPoints -= 3;
-      room->robot.fireDetected++;
+      room->robot.lastFire = (s_pos) {nextPos.x, nextPos.y};
+      room->robot.fireDetected = 3;
     }
 
   }
-  room->robot.moves++;
 
   if(idx == 0) {
     if(room->robot.fireDetected == 0) {
       room->robot.status = STATUS_DETERMINE_INTERESTING_POINT;
     } else
       room->robot.status = STATUS_GO_TO_FIRE;
-  }
-
-  if(room->robot.hasExtinguisher
-    && (room->nodes[room->robot.pos.y][room->robot.pos.x].symb == TILE_FIRE_LVL1
-    || room->nodes[room->robot.pos.y][room->robot.pos.x].symb == TILE_FIRE_LVL2
-    || room->nodes[room->robot.pos.y][room->robot.pos.x].symb == TILE_FIRE_LVL3)) {
-
-    room->robot.status = STATUS_EXTINGUISH_FIRE;
-    return -1;
   }
 
   return idx-1;
@@ -252,7 +278,7 @@ void addToRobotVision(s_room* room, s_pos pos) {
 int getDistance(s_room* room, s_pos pos) {
   vector path = getBestPath(room, room->robot.pos, pos);
   if(vector_get(&path, 0) == NULL)
-    return 100000;
+    return 1000000;
 
   int distance = vector_total(&path);
   vector_free(&path);

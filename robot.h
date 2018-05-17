@@ -29,5 +29,6 @@ int getDistance(s_room* room, s_pos pos);
 
 void setEmptyTilesInteresting(s_room* room);
 vector nextNodePath(s_room* room);
+vector fireCenterPosiblePosition(s_room* room);
 
 #endif

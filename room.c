@@ -123,6 +123,7 @@ void displayRoom(s_room* room, int drawRobotVision) {
   }
   printf("Coords: (%2d;%2d)    Has extinguisher: %d      HP: %d\n", room->robot.pos.x, room->robot.pos.y, room->robot.hasExtinguisher, room->robot.healthPoints);
   printf("Moves : %d\n", room->robot.moves);
+  printf("Fire : %d;%d\n", room->robot.lastFire.x, room->robot.lastFire.y);
 }
 
 int moveRobot(s_room* room, e_direction dir) {

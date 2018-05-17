@@ -5,7 +5,7 @@
 #include "robot.h"
 #include "display.h"
 
-#define DEFAULT_ROOM "./plans/plan1.txt"
+#define DEFAULT_ROOM "./plans/plan2.txt"
 #define TILE_EMPTY ' '
 #define TILE_WALL 'x'
 #define TILE_START 'D'
@@ -24,5 +24,6 @@
 s_room loadRoom(char* mapFilename);
 void displayRoom(s_room* room, int drawRobotVision);
 int moveRobot(s_room* room, e_direction dir);
+void resetFire(s_room* room);
 
 #endif

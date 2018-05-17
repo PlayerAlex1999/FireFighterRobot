@@ -35,5 +35,6 @@ SDL_Rect getFireAnimationStep(char c, s_SDLData* data);
 void displayScreen(s_SDLData* data, s_room* room);
 void displayBanner(s_SDLData* data, s_robot* robot);
 int getEvents(SDL_Event* event);
+void freeSDL(s_SDLData* data);
 
 #endif

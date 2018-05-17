@@ -36,9 +36,7 @@ s_SDLData initSDL() {
   data.music = Mix_LoadMUS(SOUND_BACKGROUND_MUSIC);
   if(data.music) {
     Mix_VolumeMusic(MIX_MAX_VOLUME);
-    //Mix_PlayMusic(data.music, -1);
     Mix_FadeInMusicPos(data.music, -1, 2000, 3.0);
-    //if(Mix_SetMusicPosition(3.0)==-1) {printf("%s\n", Mix_GetError()); SDL_Delay(100000);}
   }
 
   return data;
@@ -197,13 +195,6 @@ SDL_Rect getFireAnimationStep(char c, s_SDLData* data) {
 void displayScreen(s_SDLData* data, s_room* room) {
   SDL_FillRect(data->window, NULL, SDL_MapRGB(data->window->format, 0, 0, 0));
 
-  SDL_Rect banner;
-  banner.x=0;
-  banner.y=818;
-  banner.w=1600;
-  banner.h=84;
-  SDL_FillRect(data->window, &banner, SDL_MapRGB(data->window->format, 200, 200, 200));
-
   if(room->sizeX < WINDOW_X/(32*2) && room->sizeY < WINDOW_Y) {
     for(int i=0; i < room->sizeX; i++)
       for(int j=0; j < room->sizeY; j++) {
@@ -288,6 +279,16 @@ void displayScreen(s_SDLData* data, s_room* room) {
 }
 
 void displayBanner(s_SDLData* data, s_robot* robot) {
+  SDL_Rect verticalBar = {WINDOW_X/2-16, 0, 32, 900};
+  SDL_FillRect(data->window, &verticalBar, SDL_MapRGB(data->window->format, 100, 100, 100));
+
+  SDL_Rect banner;
+  banner.x=0;
+  banner.y=818;
+  banner.w=1600;
+  banner.h=84;
+  SDL_FillRect(data->window, &banner, SDL_MapRGB(data->window->format, 200, 200, 200));
+
   SDL_Surface* text;
   text = TTF_RenderText_Blended(data->font, "Life", (SDL_Color) {0,0,0});
   SDL_Rect dest = {(WINDOW_X - text->w - 300)/2, 850};
@@ -331,4 +332,19 @@ int getEvents(SDL_Event* event) {
   }
 
   return 0;
+}
+
+void freeSDL(s_SDLData* data) {
+  SDL_FreeSurface(data->window);
+  SDL_FreeSurface(data->mapTileset);
+  SDL_FreeSurface(data->robotVisionTileset);
+  SDL_FreeSurface(data->robotSpritesheet);
+  SDL_FreeSurface(data->fireAnimation);
+
+  TTF_CloseFont(data->font);
+  Mix_FreeMusic(data->music);
+
+  Mix_CloseAudio();
+  TTF_Quit();
+  SDL_Quit();
 }
