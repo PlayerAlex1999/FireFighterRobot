@@ -16,6 +16,7 @@ int main() {
   int idx = vector_total(&path)-2;
 
   while(!stop) {
+      SDL_Event event;
       displayRoom(&room, 1);
       displayScreen(&SDLData, &room);
 
@@ -36,13 +37,26 @@ int main() {
         if(idx >= 0)
           idx = moveTo(&room, &path, idx);
         else
-          exit(1);
-          //printf("[WARNING] Unpredicted behavior\n");
+          printf("[WARNING] Unpredicted behavior\n");
+      } else if(room.robot.status == STATUS_GO_TO_FIRE) {
+        vector_free(&path);
+        for(int i=0; i < room.sizeX; i++)
+          for(int j=0; j < room.sizeY; j++)
+            if(room.nodes[j][i].robotVision == TILE_FIRE_LVL1 || room.nodes[j][i].robotVision == TILE_FIRE_LVL2 || room.nodes[j][i].robotVision == TILE_FIRE_LVL3) {
+              path = getBestPath(&room, room.robot.pos, (s_pos){i, j});
+              break;
+            }
+
+        idx = vector_total(&path) - 2;
       } else {
         stop = 1;
       }
 
-      usleep(50000);
+      if(SDL_PollEvent(&event)) {
+        stop = getEvents(&event);
+      }
+
+      SDL_Delay(100);
   }
   displayRoom(&room, 1);
 

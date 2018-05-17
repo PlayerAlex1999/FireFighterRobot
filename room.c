@@ -126,6 +126,7 @@ void displayRoom(s_room* room, int drawRobotVision) {
 }
 
 int moveRobot(s_room* room, e_direction dir) {
+  room->robot.direction = dir;
   int newX=room->robot.pos.x, newY=room->robot.pos.y;
 
   switch (dir) {

@@ -43,7 +43,8 @@ typedef struct s_robot {
   int fireDetected;
   int status;
 
-  s_node* path;
+  e_direction direction;
+  //s_node* path;
 } s_robot;
 
 typedef struct s_room {

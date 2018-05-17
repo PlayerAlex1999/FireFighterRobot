@@ -8,18 +8,26 @@
 #define WINDOW_Y 900
 #define MAX_PATH 128
 #define GRAPHICS_MAP_TILESET "./data/graphics/map_tileset.png"
+#define GRAPHICS_ROBOT_VISION_TILESET "./data/graphics/robotVision_tileset.png"
 #define GRAPHICS_ROBOT_SPRITESHEET "./data/graphics/robot_spritesheet.png"
 #define GRAPHICS_FIRE_ANIMATION "./data/graphics/fire_animation.png"
 
 typedef struct s_SDLData {
     SDL_Surface* window;
     SDL_Surface* mapTileset;
+    SDL_Surface* robotVisionTileset;
     SDL_Surface* robotSpritesheet;
     SDL_Surface* fireAnimation;
+
+    int fireAnimationStep;
 } s_SDLData;
 
 s_SDLData initSDL();
-SDL_Rect getTileRect(char c);
+SDL_Rect getRobotSprite(s_robot* robot);
+SDL_Rect getMapTileRect(char c);
+SDL_Rect getRobotVisionTileRect(char c);
+SDL_Rect getFireAnimationStep(char c, s_SDLData* data);
+int getEvents(SDL_Event* event);
 void displayScreen(s_SDLData* data, s_room* room);
 
 #endif

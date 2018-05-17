@@ -10,6 +10,7 @@ s_robot initRobot(int x, int y) {
 
   robot.status = STATUS_GO_TO_EXTINGUISHER;
   robot.healthPoints = DEFAULT_HP;
+  robot.direction = UP;
 
   return robot;
 }
