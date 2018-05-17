@@ -4,7 +4,7 @@
 s_robot initRobot(int x, int y) {
   s_robot robot;
   robot.pos = (s_pos){x, y};
-  robot.moving = 0;
+  robot.moves = 0;
   robot.hasExtinguisher = 0;
   robot.fireDetected = 0;
 
@@ -205,13 +205,22 @@ int moveTo(s_room* room, vector* vect, int idx) {
     }
 
   }
-  room->robot.moving++;
+  room->robot.moves++;
 
   if(idx == 0) {
     if(room->robot.fireDetected == 0) {
       room->robot.status = STATUS_DETERMINE_INTERESTING_POINT;
     } else
       room->robot.status = STATUS_GO_TO_FIRE;
+  }
+
+  if(room->robot.hasExtinguisher
+    && (room->nodes[room->robot.pos.y][room->robot.pos.x].symb == TILE_FIRE_LVL1
+    || room->nodes[room->robot.pos.y][room->robot.pos.x].symb == TILE_FIRE_LVL2
+    || room->nodes[room->robot.pos.y][room->robot.pos.x].symb == TILE_FIRE_LVL3)) {
+
+    room->robot.status = STATUS_EXTINGUISH_FIRE;
+    return -1;
   }
 
   return idx-1;

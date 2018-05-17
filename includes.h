@@ -4,12 +4,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
+#include <SDL/SDL_mixer.h>
 
 //Library Vector by Ed Mann
 //https://eddmann.com/posts/implementing-a-dynamic-vector-array-in-c/
@@ -39,7 +40,7 @@ typedef struct s_robot {
   int healthPoints;
 
   int hasExtinguisher;
-  int moving;
+  int moves;
   int fireDetected;
   int status;
 

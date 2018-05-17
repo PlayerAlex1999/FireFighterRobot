@@ -1,7 +1,7 @@
 EXEC=FireFighterRobot
 SRC= $(wildcard *.c)
 OBJ= $(SRC:.c=.o)
-LDFLAGS=-lm -lSDL -lSDL_image
+LDFLAGS=-lm -lSDL -lSDL_image -lSDL_ttf -lSDL_mixer
 CFLAGS=-Wall
 
 all: $(EXEC)

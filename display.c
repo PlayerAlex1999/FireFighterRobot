@@ -7,6 +7,13 @@ s_SDLData initSDL() {
     printf("[CRITICAL] Error while loading SDL : %s\n", SDL_GetError());
     exit(EXIT_FAILURE);
   }
+  if(TTF_Init() == -1) {
+    printf("[CRITICAL] Error while loading SDL_TTF : %s\n", TTF_GetError());
+    exit(EXIT_FAILURE);
+  }
+  if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024) == -1) {
+   printf("[CRITICAL] Error while loading SDL_Mixer : %s\n", Mix_GetError());
+  }
 
   data.window = NULL;
   data.window = SDL_SetVideoMode(WINDOW_X, WINDOW_Y, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);
@@ -18,13 +25,21 @@ s_SDLData initSDL() {
   SDL_WM_SetCaption("Firefighter robot - Projet de fin d'année CIR 1 ISEN Yncrea Rennes | Alexandre THOMAS", NULL);
 
   data.mapTileset = IMG_Load(GRAPHICS_MAP_TILESET);
-  data.robotVisionTileset = NULL;
   data.robotVisionTileset = IMG_Load(GRAPHICS_ROBOT_VISION_TILESET);
-  if(!data.robotVisionTileset)
-    usleep(1000000000);
   data.robotSpritesheet = IMG_Load(GRAPHICS_ROBOT_SPRITESHEET);
   data.fireAnimation = IMG_Load(GRAPHICS_FIRE_ANIMATION);
   data.fireAnimationStep = -2;
+
+  data.font = TTF_OpenFont(FONT_PATH, FONT_SIZE);
+
+  data.music = NULL;
+  data.music = Mix_LoadMUS(SOUND_BACKGROUND_MUSIC);
+  if(data.music) {
+    Mix_VolumeMusic(MIX_MAX_VOLUME);
+    //Mix_PlayMusic(data.music, -1);
+    Mix_FadeInMusicPos(data.music, -1, 2000, 3.0);
+    //if(Mix_SetMusicPosition(3.0)==-1) {printf("%s\n", Mix_GetError()); SDL_Delay(100000);}
+  }
 
   return data;
 }
@@ -218,7 +233,10 @@ void displayScreen(s_SDLData* data, s_room* room) {
 
   } else {
     for(int i=-14; i<=11; i++)
-      for(int j=-12; j<=12; j++) {
+      for(int j=-20; j<=20; j++) {
+        if(11.5*32 + j*32 > WINDOW_X/2)
+          break;
+
         SDL_Rect srcMap;
         SDL_Rect destMap;
         destMap.x = 11.5*32+j*32;
@@ -227,6 +245,9 @@ void displayScreen(s_SDLData* data, s_room* room) {
           srcMap = getMapTileRect(TILE_BLACK);
         else
           srcMap = getMapTileRect(room->nodes[room->robot.pos.y + i][room->robot.pos.x + j].symb);
+
+        if(38.5*32 + j*32 < WINDOW_X/2)
+          continue;
 
         SDL_Rect srcRobotVision;
         SDL_Rect destRobotVision;
@@ -262,12 +283,44 @@ void displayScreen(s_SDLData* data, s_room* room) {
     SDL_BlitSurface(data->robotSpritesheet, &robotSprite, data->window, &destRobotVision);
   }
 
+  displayBanner(data, &(room->robot));
   SDL_Flip(data->window);
 }
 
+void displayBanner(s_SDLData* data, s_robot* robot) {
+  SDL_Surface* text;
+  text = TTF_RenderText_Blended(data->font, "Life", (SDL_Color) {0,0,0});
+  SDL_Rect dest = {(WINDOW_X - text->w - 300)/2, 850};
+  SDL_BlitSurface(text, NULL, data->window, &dest);
+  SDL_FreeSurface(text);
+
+  SDL_Rect rectPos;
+  rectPos.x = (WINDOW_X + text->w - 300)/2 + 20;
+  rectPos.y = 835;
+  rectPos.w = 300;
+  rectPos.h = 50;
+  SDL_FillRect(data->window, &rectPos, SDL_MapRGB(data->window->format, 0, 0, 0));
+  rectPos.x += 5;
+  rectPos.y += 5;
+  rectPos.w = 29*robot->healthPoints;
+  rectPos.h -= 10;
+  SDL_FillRect(data->window, &rectPos, SDL_MapRGB(data->window->format, 255, 0, 0));
+
+  char str[128];
+  snprintf(str, 128, "Coordinates : %3d;%3d", robot->pos.x, robot->pos.y);
+  text = TTF_RenderText_Blended(data->font, str, (SDL_Color) {0,0,0});
+  dest = (SDL_Rect) {50, 850};
+  SDL_BlitSurface(text, NULL, data->window, &dest);
+  SDL_FreeSurface(text);
+
+  snprintf(str, 128, "Moves : %3d", robot->moves);
+  text = TTF_RenderText_Blended(data->font, str, (SDL_Color) {0,0,0});
+  dest = (SDL_Rect) {WINDOW_X - 50 - text->w, 850};
+  SDL_BlitSurface(text, NULL, data->window, &dest);
+  SDL_FreeSurface(text);
+}
+
 int getEvents(SDL_Event* event) {
-  printf("%d\n", event->type);
-  printf("%d\n", SDL_QUIT);
   switch (event->type) {
     case SDL_QUIT:
       return 1;
