@@ -46,8 +46,12 @@ int main() {
         if(idx >= 0)
           idx = moveTo(&room, &path, idx);
         else {
-          printf("[WARNING] Unpredicted behavior\n");
-          exit(1);
+          if(room.robot.hasExtinguisher && room.robot.pos.x == room.robot.lastFire.x && room.robot.pos.y == room.robot.lastFire.y) {
+            room.robot.status = STATUS_EXTINGUISH_FIRE;
+          } else {
+            printf("[WARNING] Unpredicted behavior\n");
+            exit(1);
+          }
         }
       } else if(room.robot.status == STATUS_GO_TO_FIRE) {
         vector_free(&path);
@@ -92,7 +96,7 @@ int main() {
         if(timeBeforeExit > 10)
           stop=1;
 
-        printf("The programm will close in 10 seconds\n");
+        printf("The programm will close in few seconds\n");
       }
       else {
         stop = 1;
