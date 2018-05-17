@@ -48,6 +48,8 @@ int main() {
         else {
           if(room.robot.hasExtinguisher && room.robot.pos.x == room.robot.lastFire.x && room.robot.pos.y == room.robot.lastFire.y) {
             room.robot.status = STATUS_EXTINGUISH_FIRE;
+            if(room.nodes[room.robot.pos.y][room.robot.pos.x].symb == TILE_FIRE_LVL1)
+              room.nodes[room.robot.pos.y][room.robot.pos.x].robotVision = TILE_FIRE_LVL1;
           } else {
             printf("[WARNING] Unpredicted behavior\n");
             exit(1);
@@ -78,6 +80,13 @@ int main() {
           idx = moveTo(&room, &path, idx);
         else if (possibilityTested+1 < vector_total(&firePossibilies)) {
           possibilityTested++;
+          int ok=0;
+          while(!ok && possibilityTested+1 < vector_total(&firePossibilies)) {
+            if(room.nodes[((s_node*)vector_get(&firePossibilies, possibilityTested))->pos.y][((s_node*)vector_get(&firePossibilies, possibilityTested))->pos.x].robotVision == TILE_VISITED)
+              possibilityTested++;
+            else
+              ok=1;
+          }
           path = getBestPath(&room, room.robot.pos, ((s_node*)vector_get(&firePossibilies, possibilityTested))->pos);
           idx = vector_total(&path)-2;
         } else if (room.robot.status != STATUS_WAIT_TO_EXIT){
@@ -85,7 +94,7 @@ int main() {
           stop=1;
         }
       } else if (room.robot.status == STATUS_WAIT_TO_EXIT) {
-        if(timeBeforeExit == 0) {
+        if(timeBeforeExit < 1) {
           for(int i=0; i<room.sizeX; i++)
             for(int j=0; j<room.sizeY; j++)
               if(room.nodes[j][i].symb == TILE_FIRE_LVL1 || room.nodes[j][i].symb == TILE_FIRE_LVL2 || room.nodes[j][i].symb == TILE_FIRE_LVL3)
@@ -109,7 +118,6 @@ int main() {
       SDL_Delay(100);
   }
 
-  printf("AAAAAAAAAAAAAAAA\n");
   displayRoom(&room, 1);
   vector_free(&path);
   freeSDL(&SDLData);
