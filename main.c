@@ -1,14 +1,18 @@
 #include "includes.h"
 #include "room.h"
 
-int main() {
+int main(int argc, char** argv) {
   int stop = 0;
 
   srand(time(NULL));
 
+  char file[MAX_PATH];
+  printf("File > ");
+  scanf("%s", file);
+
   s_SDLData SDLData = initSDL();
 
-  s_room room = loadRoom(DEFAULT_ROOM);
+  s_room room = loadRoom(file);
   vector path = getBestPath(&room, room.startPos, room.extinguisherPos);
   vector firePossibilies;
   int possibilityTested = 0;
@@ -23,9 +27,9 @@ int main() {
   //printf("%d;%d\n", room.extinguisherPos.x, room.extinguisherPos.y);
   //printf("%d;%d\n", ((s_node*)vector_get(&path,0))->pos.x, ((s_node*)vector_get(&path,0))->pos.y);
   //usleep(10000000);
+  SDL_Event event;
 
   while(!stop) {
-      SDL_Event event;
       displayRoom(&room, 1);
       displayScreen(&SDLData, &room);
 
@@ -118,7 +122,11 @@ int main() {
       }
 
       if(SDL_PollEvent(&event)) {
-        stop = getEvents(&event);
+        switch (event.type) {
+          case SDL_QUIT:
+            stop = 1;
+            break;
+        }
       }
 
       SDL_Delay(100);

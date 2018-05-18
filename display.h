@@ -7,6 +7,7 @@
 #define WINDOW_X 1600
 #define WINDOW_Y 900
 #define MAX_PATH 128
+#define GRAPHICS_ICON "./data/graphics/icon.png"
 #define GRAPHICS_MAP_TILESET "./data/graphics/map_tileset.png"
 #define GRAPHICS_ROBOT_VISION_TILESET "./data/graphics/robotVision_tileset.png"
 #define GRAPHICS_ROBOT_SPRITESHEET "./data/graphics/robot_spritesheet.png"
@@ -17,6 +18,7 @@
 
 typedef struct s_SDLData {
     SDL_Surface* window;
+    SDL_Surface* icon;
     SDL_Surface* mapTileset;
     SDL_Surface* robotVisionTileset;
     SDL_Surface* robotSpritesheet;

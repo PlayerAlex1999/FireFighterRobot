@@ -22,7 +22,9 @@ s_SDLData initSDL() {
     exit(EXIT_FAILURE);
   }
 
-  SDL_WM_SetCaption("Firefighter robot - Projet de fin d'année CIR 1 ISEN Yncrea Rennes | Alexandre THOMAS", NULL);
+  SDL_WM_SetCaption("Firefighter Robot - Projet de fin d'année CIR 1 ISEN Yncrea Rennes | Alexandre THOMAS", NULL);
+  data.icon = IMG_Load(GRAPHICS_ICON);
+  SDL_WM_SetIcon(data.icon, NULL);
 
   data.mapTileset = IMG_Load(GRAPHICS_MAP_TILESET);
   data.robotVisionTileset = IMG_Load(GRAPHICS_ROBOT_VISION_TILESET);
@@ -318,6 +320,17 @@ void displayBanner(s_SDLData* data, s_robot* robot) {
   text = TTF_RenderText_Blended(data->font, str, (SDL_Color) {0,0,0});
   dest = (SDL_Rect) {WINDOW_X - 50 - text->w, 850};
   SDL_BlitSurface(text, NULL, data->window, &dest);
+
+  strncpy(str, "Plans", 128);
+  text = TTF_RenderText_Blended(data->font, str, (SDL_Color) {100,100,100});
+  dest = (SDL_Rect) {WINDOW_X/4 - text->w/2, 50};
+  SDL_BlitSurface(text, NULL, data->window, &dest);
+
+  strncpy(str, "Robot Vision", 128);
+  text = TTF_RenderText_Blended(data->font, str, (SDL_Color) {100,100,100});
+  dest = (SDL_Rect) {3*WINDOW_X/4 - text->w/2, 50};
+  SDL_BlitSurface(text, NULL, data->window, &dest);
+
   SDL_FreeSurface(text);
 }
 

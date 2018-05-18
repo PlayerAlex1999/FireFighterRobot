@@ -189,7 +189,7 @@ int moveTo(s_room* room, vector* vect, int idx) {
       setEmptyTilesInteresting(room);
     }
 
-    if(room->robot.hasExtinguisher && room->nodes[nextPos.y][nextPos.x].symb == TILE_FIRE_LVL3) {
+    if(room->robot.hasExtinguisher && room->nodes[nextPos.y][nextPos.x].symb >= '1' && room->nodes[nextPos.y][nextPos.x].symb < '3') {
       room->robot.status = STATUS_WAIT_TO_EXIT;
       return -1;
     }

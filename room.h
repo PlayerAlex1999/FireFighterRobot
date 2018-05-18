@@ -5,7 +5,7 @@
 #include "robot.h"
 #include "display.h"
 
-#define DEFAULT_ROOM "./plans/plan1.txt"
+#define DEFAULT_ROOM "./plans/plan2.txt"
 #define TILE_EMPTY ' '
 #define TILE_WALL 'x'
 #define TILE_START 'D'
