@@ -14,9 +14,6 @@ int main(int argc, char** argv) {
 
   s_room room = loadRoom(file);
   vector path = getBestPath(&room, room.startPos, room.extinguisherPos);
-  vector firePossibilies;
-  int possibilityTested = 0;
-  int possibilityGet = 0;
   float timeBeforeExit = 0;
 
   displayRoom(&room, 0);
@@ -24,14 +21,16 @@ int main(int argc, char** argv) {
 
   int idx = vector_total(&path)-2;
 
-  //printf("%d;%d\n", room.extinguisherPos.x, room.extinguisherPos.y);
-  //printf("%d;%d\n", ((s_node*)vector_get(&path,0))->pos.x, ((s_node*)vector_get(&path,0))->pos.y);
-  //usleep(10000000);
   SDL_Event event;
 
   while(!stop) {
       displayRoom(&room, 1);
       displayScreen(&SDLData, &room);
+
+      if(room.robot.healthPoints <= 0) {
+        printf("The robot died\n");
+        stop = 1;
+      }
 
       if(room.robot.status == STATUS_GO_TO_EXTINGUISHER) {
         if(idx >= 0)
@@ -66,56 +65,26 @@ int main(int argc, char** argv) {
         idx = vector_total(&path) - 2;
         room.robot.status = STATUS_SEARCH_FIRE;
       } else if (room.robot.status == STATUS_EXTINGUISH_FIRE) {
-        if(1) {
-          room.robot.status = STATUS_WAIT_TO_EXIT;
-        }
-        else if(!possibilityGet) {
-          vector_free(&path);
-          firePossibilies = fireCenterPosiblePosition(&room);
-          possibilityTested = 0;
-          possibilityGet = 1;
+        room.robot.status = STATUS_WAIT_TO_EXIT;
 
-          if(vector_total(&firePossibilies) == 0) {
-            printf("[CRITICAL] Can't find fire\n");
-            exit(EXIT_FAILURE);
-          }
+        for(int i=0; i<room.sizeX; i++)
+          for(int j=0; j<room.sizeY; j++)
+            if(room.nodes[j][i].symb == TILE_FIRE_LVL1 || room.nodes[j][i].symb == TILE_FIRE_LVL2 || room.nodes[j][i].symb == TILE_FIRE_LVL3) {
+              room.nodes[j][i].robotVision = room.nodes[j][i].symb;
+              room.nodes[j][i].symb = TILE_EXTINGUISHED_FIRE;
+            }
 
-          path = getBestPath(&room, room.robot.pos, ((s_node*)vector_get(&firePossibilies, possibilityTested))->pos);
-          idx = vector_total(&path)-2;
-        }
-
-        if(idx >= 0)
-          idx = moveTo(&room, &path, idx);
-        else if (possibilityTested+1 < vector_total(&firePossibilies)) {
-          possibilityTested++;
-          int ok=0;
-          while(!ok && possibilityTested+1 < vector_total(&firePossibilies)) {
-            if(room.nodes[((s_node*)vector_get(&firePossibilies, possibilityTested))->pos.y][((s_node*)vector_get(&firePossibilies, possibilityTested))->pos.x].robotVision == TILE_VISITED)
-              possibilityTested++;
-            else
-              ok=1;
-          }
-          path = getBestPath(&room, room.robot.pos, ((s_node*)vector_get(&firePossibilies, possibilityTested))->pos);
-          idx = vector_total(&path)-2;
-        } else if (room.robot.status != STATUS_WAIT_TO_EXIT){
-          printf("[CRITICAL] Fire not found\n");
-          stop=1;
-        }
       } else if (room.robot.status == STATUS_WAIT_TO_EXIT) {
-        if(timeBeforeExit < 1) {
-          for(int i=0; i<room.sizeX; i++)
-            for(int j=0; j<room.sizeY; j++)
-              if(room.nodes[j][i].symb == TILE_FIRE_LVL1 || room.nodes[j][i].symb == TILE_FIRE_LVL2 || room.nodes[j][i].symb == TILE_FIRE_LVL3) {
-                room.nodes[j][i].robotVision = room.nodes[j][i].symb;
-                room.nodes[j][i].symb = TILE_EXTINGUISHED_FIRE;
-              }
-        }
+        for(int i=0; i<room.sizeX; i++)
+          for(int j=0; j<room.sizeY; j++)
+            if(room.nodes[j][i].symb == TILE_FIRE_LVL1 || room.nodes[j][i].symb == TILE_FIRE_LVL2 || room.nodes[j][i].symb == TILE_FIRE_LVL3) {
+              room.nodes[j][i].robotVision = room.nodes[j][i].symb;
+              room.nodes[j][i].symb = TILE_EXTINGUISHED_FIRE;
+            }
 
         timeBeforeExit += 0.1;
         if(timeBeforeExit > 10)
           stop=1;
-
-        printf("The programm will close in few seconds\n");
       }
       else {
         stop = 1;
@@ -132,9 +101,7 @@ int main(int argc, char** argv) {
       SDL_Delay(100);
   }
 
-  displayRoom(&room, 1);
   vector_free(&path);
-  freeSDL(&SDLData);
 
   return EXIT_SUCCESS;
 }
