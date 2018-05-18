@@ -182,16 +182,22 @@ int moveTo(s_room* room, vector* vect, int idx) {
             addToRobotVision(room, (s_pos){nextPos.x + i, nextPos.y + j});
     }
 
+    room->robot.moves++;
     if(room->nodes[nextPos.y][nextPos.x].symb == TILE_EXTINGUISHER) {
       room->nodes[nextPos.y][nextPos.x].symb = ' ';
       room->robot.hasExtinguisher = 1;
       setEmptyTilesInteresting(room);
     }
 
-    room->robot.moves++;
+    if(room->robot.hasExtinguisher && room->nodes[nextPos.y][nextPos.x].symb == TILE_FIRE_LVL3) {
+      room->robot.status = STATUS_WAIT_TO_EXIT;
+      return -1;
+    }
+
     if(room->nodes[nextPos.y][nextPos.x].symb >= '1' && room->nodes[nextPos.y][nextPos.x].symb <= '3') {
       room->nodes[nextPos.y][nextPos.x].robotVision = room->nodes[nextPos.y][nextPos.x].symb;
       if(room->robot.status == STATUS_SEARCH_FIRE && room->robot.hasExtinguisher) {
+        room->robot.fireDetected = room->nodes[nextPos.y][nextPos.x].symb - '0';
         room->robot.status = STATUS_EXTINGUISH_FIRE;
         return -1;
       }

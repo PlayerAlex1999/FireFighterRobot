@@ -62,7 +62,10 @@ int main() {
         idx = vector_total(&path) - 2;
         room.robot.status = STATUS_SEARCH_FIRE;
       } else if (room.robot.status == STATUS_EXTINGUISH_FIRE) {
-        if(!possibilityGet) {
+        if(1) {
+          room.robot.status = STATUS_WAIT_TO_EXIT;
+        }
+        else if(!possibilityGet) {
           vector_free(&path);
           firePossibilies = fireCenterPosiblePosition(&room);
           possibilityTested = 0;
@@ -76,6 +79,7 @@ int main() {
           path = getBestPath(&room, room.robot.pos, ((s_node*)vector_get(&firePossibilies, possibilityTested))->pos);
           idx = vector_total(&path)-2;
         }
+
         if(idx >= 0)
           idx = moveTo(&room, &path, idx);
         else if (possibilityTested+1 < vector_total(&firePossibilies)) {
@@ -97,8 +101,10 @@ int main() {
         if(timeBeforeExit < 1) {
           for(int i=0; i<room.sizeX; i++)
             for(int j=0; j<room.sizeY; j++)
-              if(room.nodes[j][i].symb == TILE_FIRE_LVL1 || room.nodes[j][i].symb == TILE_FIRE_LVL2 || room.nodes[j][i].symb == TILE_FIRE_LVL3)
+              if(room.nodes[j][i].symb == TILE_FIRE_LVL1 || room.nodes[j][i].symb == TILE_FIRE_LVL2 || room.nodes[j][i].symb == TILE_FIRE_LVL3) {
+                room.nodes[j][i].robotVision = room.nodes[j][i].symb;
                 room.nodes[j][i].symb = TILE_EXTINGUISHED_FIRE;
+              }
         }
 
         timeBeforeExit += 0.1;

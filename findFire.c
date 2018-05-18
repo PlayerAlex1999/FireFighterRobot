@@ -245,7 +245,7 @@ vector nextNodePath(s_room* room) {
       vector_add(&bestNodes, vector_get(&interestingPoints, i));
     }
 
-  s_node* node = (s_node*)vector_get(&bestNodes, rand()%vector_total(&bestNodes));
+  s_node* node = (s_node*)vector_get(&bestNodes, 0);
 
   free(distances);
   vector_free(&interestingPoints);
@@ -280,13 +280,11 @@ vector fireCenterPosiblePosition(s_room* room) {
             || (dist > 0 && dist <= 2 && room->nodes[j][i].robotVision == TILE_FIRE_LVL1)) {
                 if(room->nodes[b][a].symb == TILE_WALL)
                   continue;
+                //printf("aaaaaaaaaaaaaaaaaaa\n");
+                //usleep(10000000);
 
                 if(!pointPlaced) {
                   vector_add(&possiblePosition, &(room->nodes[b][a]));
-                  if(room->robot.fireDetected == 1) {
-                    vector_free(&commonPoint);
-                    return possiblePosition;
-                  }
 
                 } else {
                   s_node* temp = &(room->nodes[b][a]);
@@ -310,7 +308,7 @@ vector fireCenterPosiblePosition(s_room* room) {
       pointPlaced=1;
     }
 
-
+    /*
     for(int k=0; k<vector_total(&possiblePosition); k++) {
       s_node* temp = (s_node*)vector_get(&possiblePosition, k);
       temp->symb = '+';
@@ -319,7 +317,7 @@ vector fireCenterPosiblePosition(s_room* room) {
     displayRoom(room, 1);
     printf("FINAL : %d\n", vector_total(&possiblePosition));
     usleep(5000000);
-
+    */
 
     if(vector_total(&possiblePosition) == 0)
       printf("[CRITICAL] Can't find fire\n");
