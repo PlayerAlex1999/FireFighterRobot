@@ -112,10 +112,10 @@ void setEmptyTilesInteresting(s_room* room) {
           pointFound = 0;
 
       if(pointFound) {
-        for(int k=-1; k<=1; k++)
+		for(int k=-1; k<=1; k++)
           room->nodes[j][i+k].robotVision = TILE_EMPTY;
 
-          room->nodes[j][i].robotVision = TILE_INTERESTING;
+        room->nodes[j][i].robotVision = TILE_INTERESTING;
       }
   }
 
